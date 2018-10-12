@@ -26,7 +26,7 @@ void usage(int argc, char *argv[])
     printf("  -R <prefix>: run a test suite\n");
     printf("  -l: list all available tests (depending on current prefix)\n");
     printf("Options:\n");
-    printf("  -p <testprefix>: set test prefix (default is \"%s\")\n", PREFIX);
+    printf("  -p <testprefix>: set test prefix (default is \"%s\")\n", TESTFW_PREFIX);
     printf("  -o <logfile>: redirect test stdout & stderr to a log file\n");
     printf("  -O: redirect test stdout & stderr to /dev/null\n");
     printf("  -t <timeout>: set time limits for each test (in sec.)\n");
@@ -41,7 +41,7 @@ void usage(int argc, char *argv[])
 
 /* ********** LIST ********** */
 
-void callback_list(struct test *test, void *data)
+void callback_list(struct testfw_test_t *test, void *data)
 {
     printf("%s\n", test->name);
 }
@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
     char *testname = NULL;
     bool count = false;
     bool silent = false; // silent mode
-    char *prefix = PREFIX;
-    enum runmode_t mode = FORK; // default mode
+    char *prefix = TESTFW_PREFIX;
+    enum testfw_mode_t mode = TESTFW_FORK; // default mode
     enum action_t action = RUNALL; // default action
 
     while ((opt = getopt(argc, argv, "t:Tnalp:sScto:Or:R:h?")) != -1)
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
             timeout = 0; // no timeout
             break;
         case 'n':
-            mode = NOFORK;
+            mode = TESTFW_NOFORK;
             break;
         case '?':
         case 'h':
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     int testargc = argc - optind;
     char **testargv = argv + optind;
-    struct testfw *fw = testfw_init(argv[0], timeout, logfile, silent);
+    struct testfw_t *fw = testfw_init(argv[0], timeout, logfile, silent);
 
     int nfailures = 0;
     if (action == LIST)
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
     /* free tests */
     testfw_free(fw);
 
-    if (count || mode == NOFORK)
+    if (count || mode == TESTFW_NOFORK)
         return nfailures;
 
     return EXIT_SUCCESS;
