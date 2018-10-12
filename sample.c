@@ -22,22 +22,6 @@ int test_failure(int argc, char* argv[])
 }
 
 /**
- * @brief return negative value
- */
-// int test_negret(int argc, char* argv[])
-// {
-//     return -1;
-// }
-
-/**
- * @brief return positive value > 0
- */
-// int test_posret(int argc, char* argv[])
-// {
-//     return 2;
-// }
-
-/**
  * @brief test segmentation fault (memory access violation)
  */
 int test_segfault(int argc, char* argv[])
@@ -64,3 +48,19 @@ int test_sleep(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
+
+/**
+ * @brief return negative value
+ */
+int anothertest_negret(int argc, char* argv[])
+{
+    return -1;
+}
+
+/**
+ * @brief return positive value > 0
+ */
+int anothertest_posret(int argc, char* argv[])
+{
+    return 2;
+}

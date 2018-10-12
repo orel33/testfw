@@ -41,7 +41,7 @@ void usage(int argc, char *argv[])
 
 /* ********** LIST ********** */
 
-void callback_list(struct testfw_test_t *test, void *data)
+void callback_list(struct test_t *test, void *data)
 {
     printf("%s\n", test->name);
 }
