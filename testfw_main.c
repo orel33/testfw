@@ -3,15 +3,15 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 #include <getopt.h>
 
 #include "testfw.h"
 
 enum action_t
 {
-    RUNALL,
-    RUNSUITE,
-    RUNONE,
+    EXECUTE,
     LIST
 };
 
@@ -21,16 +21,15 @@ void usage(int argc, char *argv[])
 {
     printf("Usage: %s [options] [actions] [-- <testargs> ...]\n", argv[0]);
     printf("Actions:\n");
-    printf("  -a: run all tests one by one [default]\n");
-    printf("  -r <testname>: run a single test\n");
-    printf("  -R <prefix>: run a test suite\n");
-    printf("  -l: list all available tests (depending on current prefix)\n");
+    printf("  -x: execute all registered tests\n");
+    printf("  -l: list all registered tests\n");
     printf("Options:\n");
-    printf("  -p <testprefix>: set test prefix (default is \"%s\")\n", TESTFW_PREFIX);
+    printf("  -r <suite.testname>: register a function \"suite_testname()\" as a test\n");
+    printf("  -R <suite>: register all functions \"suite_*()\" as a test suite\n");
     printf("  -o <logfile>: redirect test stdout & stderr to a log file\n");
     printf("  -O: redirect test stdout & stderr to /dev/null\n");
-    printf("  -t <timeout>: set time limits for each test (in sec.)\n");
-    printf("  -T: no timeout [default]\n");
+    printf("  -t <timeout>: set time limits for each test (in sec.) [default %d]\n", TESTFW_DEFAULT_TIMEOUT);
+    printf("  -T: no timeout\n");
     printf("  -c: return the total number of test failures\n");
     printf("  -s: silent mode\n");
     printf("  -n: disable fork mode (no fork)\n");
@@ -43,7 +42,7 @@ void usage(int argc, char *argv[])
 
 void callback_list(struct test_t *test, void *data)
 {
-    printf("%s\n", test->name);
+    printf("%s.%s\n", test->suite, test->name);
 }
 
 /* ********** MAIN ********** */
@@ -51,33 +50,43 @@ void callback_list(struct test_t *test, void *data)
 int main(int argc, char *argv[])
 {
     int opt;
-    char *logfile = NULL;
-    int timeout = 0; // no timeout (default)
-    char *testname = NULL;
-    bool count = false;
-    bool silent = false; // silent mode
-    char *prefix = TESTFW_PREFIX;
-    enum testfw_mode_t mode = TESTFW_FORK; // default mode
-    enum action_t action = RUNALL; // default action
 
-    while ((opt = getopt(argc, argv, "t:Tnalp:sScto:Or:R:h?")) != -1)
+    char *logfile = NULL;                  // test log (no log by default)
+    int timeout = TESTFW_DEFAULT_TIMEOUT;  // timeout (in sec.)
+    bool count = false;                    // return nb failures
+    bool silent = false;                   // silent mode
+    enum testfw_mode_t mode = TESTFW_FORK; // default mode
+    enum action_t action = EXECUTE;        // default action
+    char *suite = TESTFW_DEFAULT_SUITE;    // default suite
+    char *testname = NULL;
+
+    while ((opt = getopt(argc, argv, "r:R:t:TnsSco:Olxh?")) != -1)
     {
         switch (opt)
         {
-            // actions
-        case 'a':
-            action = RUNALL;
+        // register tests
+        case 'r':
+        {
+            char *sep = strchr(optarg, '.');
+            if(!sep) {
+                fprintf(stderr, "Error: invalid test name %s\n", optarg);
+                exit(EXIT_FAILURE);
+            }
+            *sep = 0;
+            suite = optarg;
+            testname = sep + 1;
+            break;
+        }
+        case 'R':
+            suite = optarg;
+            testname = NULL;
+            break;
+        // actions
+        case 'x':
+            action = EXECUTE;
             break;
         case 'l':
             action = LIST;
-            break;
-        case 'r':
-            action = RUNONE;
-            testname = optarg;
-            break;
-        case 'R':
-            action = RUNSUITE;
-            testname = optarg;
             break;
         // options
         case 's':
@@ -95,9 +104,6 @@ int main(int argc, char *argv[])
         case 'S':
             silent = true;
             logfile = "/dev/null";
-            break;
-        case 'p':
-            prefix = optarg;
             break;
         case 't':
             timeout = atoi(optarg);
@@ -120,26 +126,22 @@ int main(int argc, char *argv[])
     char **testargv = argv + optind;
     struct testfw_t *fw = testfw_init(argv[0], timeout, logfile, silent);
 
+    // register tests
+    if (suite && testname)
+        testfw_register_symb(fw, suite, testname);
+    else if (suite)
+        testfw_register_suite(fw, suite);
+
+    /* actions */
     int nfailures = 0;
     if (action == LIST)
     {
-        testfw_register_prefix(fw, prefix);
-        testfw_iterate_all(fw, prefix, callback_list, NULL);
+        testfw_iterate_all(fw, callback_list, NULL);
     }
-    else if (action == RUNONE)
+    else if (action == EXECUTE)
     {
-        testfw_register_symb(fw, prefix, testname);
-        nfailures = testfw_run_one(fw, prefix, testname, testargc, testargv, mode);
-    }
-    else if (action == RUNSUITE)
-    {
-        testfw_register_prefix(fw, prefix);
-        nfailures =testfw_run_all(fw, testname, testargc, testargv, mode);
-    }
-    else if (action == RUNALL)
-    {
-        testfw_register_prefix(fw, prefix);
-        nfailures =testfw_run_all(fw, NULL, testargc, testargv, mode);
+        // nfailures = testfw_run_one(fw, suite, testname, testargc, testargv, mode);
+        nfailures = testfw_run_all(fw, testargc, testargv, mode);
     }
     else
         usage(argc, argv);

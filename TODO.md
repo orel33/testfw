@@ -1,5 +1,5 @@
 # TODO
 
-* rename 'prefix' to 'suite'
 * handle SIGALRM properly
-* rename 'testfw_register_prefix' into 'register_test_suite'
+* in testfw_main.c, need to support multiple registrations with -r/-R options
+

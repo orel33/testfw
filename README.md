@@ -28,7 +28,7 @@ ar rcs libtestfw_main.a testfw_main.o
 
 ## Adding a First Test
 
-Adding a test is really simple, you just need to edit a new file *tests.c* and to include some test functions (with a "test_" prefix) as follows:
+Adding a test is really simple, you just need to edit a new file *tests.c* and to include some test functions (with a "test_" suite) as follows:
 
 ```c
 #include <stdio.h>
@@ -64,20 +64,21 @@ gcc sample.o -o sample -rdynamic -ltestfw_main -ltestfw -ldl -L.
 
 The '-rdynamic' option is required to load all symbols in the dynamic symbol table (ELF linker).
 
-Usage:
+Then, launching the main routine provide you some helpful commands to run your tests. Usage:
 
 ```text
 $ ./sample -h
 Usage: ./sample [options] [actions] [-- <testargs> ...]
 Actions:
-  -a: run all tests one by one [default]
-  -r <testname>: run a single test
-  -l: list all available tests (depending on current prefix)
+  -x: execute all registered tests
+  -l: list all registered tests
 Options:
-  -p <testprefix>: set test prefix (default is "test")
+  -r <suite.testname>: register a function "suite_testname()" as a test
+  -R <suite>: register all functions "suite_*()" as a test suite
   -o <logfile>: redirect test stdout & stderr to a log file
   -O: redirect test stdout & stderr to /dev/null
-  -t <timeout>: set time limits for each test (default is 2s)
+  -t <timeout>: set time limits for each test (in sec.) [default 1]
+  -T: no timeout
   -c: return the total number of test failures
   -s: silent mode
   -n: disable fork mode (no fork)
@@ -85,44 +86,38 @@ Options:
   -h: print this help message
 ```
 
-Run all tests one by one:
+Run the test suite "test" with some options (timeout = 2 seconds, log file = test.log):
 
 ```bash
-$ ./sample -O
-[KILLED] run test "test.assert" in 0.48 ms (signal "Aborted", wstatus 6)
-[FAILURE] run test "test.failure" in 0.36 ms (status 1, wstatus 256)
-[KILLED] run test "test.segfault" in 0.37 ms (signal "Segmentation fault", wstatus 11)
-[TIMEOUT] run test "test.sleep" in 2000.30 ms (signal "Alarm clock", wstatus 14)
-[SUCCESS] run test "test.success" in 0.40 ms (status 0, wstatus 0)
+$ ./sample -R sample -t 2 -O -x
+[KILLED] run test "sample.assert" in 0.57 ms (signal "Aborted", wstatus 6)
+[FAILURE] run test "sample.failure" in 0.48 ms (status 1, wstatus 256)
+[KILLED] run test "sample.segfault" in 0.45 ms (signal "Segmentation fault", wstatus 11)
+[TIMEOUT] run test "sample.sleep" in 1000.63 ms (signal "Alarm clock", wstatus 14)
+[SUCCESS] run test "sample.success" in 0.59 ms (status 0, wstatus 0)
 ```
 
-Run a single test (fork mode):
+Run a single test in *fork* mode (default):
 
 ```bash
-$ ./sample -r failure
-[FAILURE] run failure in 0.63 ms (status 1)
+$ ./sample -r sample.failure -x
+[FAILURE] run test "sample.failure" in 0.53 ms (status 1, wstatus 256)
+$ echo $?
+0
 ```
 
-Run a single test (nofork mode):
+In the *fork* mode, each test is runned separately in child process... The failure of a test will not affect the execution of following tests.
+
+Run a single test (in *nofork* mode):
 
 ```bash
-$ ./sample -n -r failure
-[FAILURE] run failure in 0.63 ms (status 1)
+$ ./sample -r sample.failure -n -x
+[FAILURE] run test "sample.failure" in 0.53 ms (status 1, wstatus 256)
 $ echo $?
 1
 ```
 
-This mode launches a single test function *directly* (without fork) and it is especially useful to integrate it into another test framework as CTest. See [CMakeLists.txt](CMakeLists.txt).
-
-Adding tests for CMake:
-
-```cmake
-set(cases "success" "failure" "segfault" "assert" "sleep")
-foreach(case ${cases})
-add_test(sample_${case} sample -n -r ${case})
-set_tests_properties (sample_${case} PROPERTIES TIMEOUT 2)
-endforeach()
-```
+In the *nofork* mode, each test is runned *directly* as function call (without fork). As a consequence, the first test that fails will interrupt all the following.  It is especially useful when running all tests one by one within another test framework as CTest. See [CMakeLists.txt](CMakeLists.txt).
 
 And running tests.
 
@@ -130,57 +125,53 @@ And running tests.
 $ make && make test
 Running tests...
 Test project /home/orel/Documents/Teaching/ProjetTechno/GIT/testfw/build
-    Start 1: sample_success
-1/5 Test #1: sample_success ...................   Passed    0.00 sec
-    Start 2: sample_failure
-2/5 Test #2: sample_failure ...................***Failed    0.00 sec
-    Start 3: sample_segfault
-3/5 Test #3: sample_segfault ..................***Exception: SegFault  0.00 sec
-    Start 4: sample_assert
-4/5 Test #4: sample_assert ....................***Exception: Child aborted  0.00 sec
-    Start 5: sample_sleep
-5/5 Test #5: sample_sleep .....................***Timeout   2.01 sec
+    Start 1: sample.success
+1/5 Test #1: sample.success ...................   Passed    0.00 sec
+    Start 2: sample.failure
+2/5 Test #2: sample.failure ...................***Failed    0.00 sec
+    Start 3: sample.segfault
+3/5 Test #3: sample.segfault ..................***Exception: SegFault  0.00 sec
+    Start 4: sample.assert
+4/5 Test #4: sample.assert ....................***Exception: Child aborted  0.00 sec
+    Start 5: sample.sleep
+5/5 Test #5: sample.sleep .....................***Timeout   2.01 sec
 ```
 
 ## Main Routine
 
-A *main()* routine is already provided for convenience in the *libtestfw_main.a* library, but it could be useful in certain case to write your own *main()* routine based on the [testfw.h](testfw.h) API.
+A *main()* routine is already provided for convenience in the *libtestfw_main.a* library, but it could be useful in certain case to write your own *main()* routine based on the [testfw.h](testfw.h) API. See [sample_main.c](sample_main.c).
 
 ```c
 #include <stdlib.h>
 #include <stdbool.h>
 #include "testfw.h"
+#include "sample.h"
 
 #define TIMEOUT 2
 #define LOGFILE "test.log"
-#define SILENT true
+#define SILENT false
 
-int test_first(int argc, char* argv[]) { /* ... */ }
-int test_second(int argc, char* argv[]) { /* ... */ }
-int anothertest_first(int argc, char* argv[]) { /* ... */ }
-int anothertest_second(int argc, char* argv[]) { /* ... */ }
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-  struct testfw_t *fw = testfw_init(argv[0], TIMEOUT, LOGFILE, SILENT);
-  testfw_register_func(fw, "test", "first", test_first);
-  testfw_register_symb(fw, "test", "second");
-  testfw_register_prefix(fw, "anothertest");
- testfw_run_all(fw, argc-1, argv+1, FORK);
-  testfw_free(fw);
-  return EXIT_SUCCESS;
+    struct testfw_t *fw = testfw_init(argv[0], TIMEOUT, LOGFILE, SILENT);
+    testfw_register_func(fw, "sample", "success", sample_success);
+    testfw_register_symb(fw, "sample", "failure");
+    testfw_register_suite(fw, "othersample");
+    testfw_run_all(fw, argc - 1, argv + 1, TESTFW_FORK);
+    testfw_free(fw);
+    return EXIT_SUCCESS;
 }
 ```
 
-Compiling and running this test [sample-main.c](sample-main.c) will produce the following results.
+Compiling and running this test will produce the following results.
 
 ```bash
-$ gcc sample-main.c std=c99 -rdynamic Wall -o sample-main -ltestfw -ldl -L.
-$ ./sample-main
-[SUCCESS] run test "test.first" in 0.51 ms (status 0, wstatus 0)
-[SUCCESS] run test "test.second" in 0.51 ms (status 0, wstatus 0)
-[SUCCESS] run test "anothertest.first" in 0.56 ms (status 0, wstatus 0)
-[SUCCESS] run test "anothertest.second" in 0.64 ms (status 0, wstatus 0)
+$ gcc -std=c99 -rdynamic -Wall sample.c sample_main.c -o sample_main -ltestfw -ldl -L.
+$ ./sample_main
+[SUCCESS] run test "sample.success" in 0.41 ms (status 0, wstatus 0)
+[FAILURE] run test "sample.failure" in 0.52 ms (status 1, wstatus 256)
+[FAILURE] run test "othersample.negret" in 0.52 ms (status 255, wstatus 65280)
+[FAILURE] run test "othersample.posret" in 0.52 ms (status 2, wstatus 512)
 ```
 
 ---
