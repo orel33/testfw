@@ -6,7 +6,6 @@
 #include <stdbool.h>
 
 #define PREFIX "test"
-#define TIMEOUT 2 // default timeout (in sec.), 0 if no timeout
 
 /* ********** TEST FRAMEWORK API ********** */
 
