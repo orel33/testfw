@@ -64,7 +64,6 @@ gcc sample.o -o sample -rdynamic -ltestfw_main -ltestfw -ldl -L.
 
 The '-rdynamic' option is required to load all symbols in the dynamic symbol table (ELF linker).
 
-
 Usage:
 
 ```text
@@ -163,12 +162,12 @@ int anothertest_second(int argc, char* argv[]) { /* ... */ }
 
 int main(int argc, char* argv[])
 {
-  struct testfw *fw = init_tests(argv[0], TIMEOUT, LOGFILE, SILENT);
-  register_test_func(fw, "test", "first", test_first);
-  register_test_symb(fw, "test", "second");
-  register_all_tests(fw, "anothertest");
-  run_all_tests(fw, argc-1, argv+1, FORK);
-  free_tests(fw);
+  struct testfw *fw = testfw_init(argv[0], TIMEOUT, LOGFILE, SILENT);
+  testfw_register_func(fw, "test", "first", test_first);
+  testfw_register_symb(fw, "test", "second");
+  testfw_register_prefix(fw, "anothertest");
+ testfw_run_all(fw, argc-1, argv+1, FORK);
+  testfw_free(fw);
   return EXIT_SUCCESS;
 }
 ```
@@ -176,7 +175,8 @@ int main(int argc, char* argv[])
 Compiling and running this test [sample-main.c](sample-main.c) will produce the following results.
 
 ```bash
-$ ./mymain 
+$ gcc sample-main.c std=c99 -rdynamic Wall -o sample-main -ltestfw -ldl -L.
+$ ./sample-main
 [SUCCESS] run test "test.first" in 0.51 ms (status 0, wstatus 0)
 [SUCCESS] run test "test.second" in 0.51 ms (status 0, wstatus 0)
 [SUCCESS] run test "anothertest.first" in 0.56 ms (status 0, wstatus 0)
