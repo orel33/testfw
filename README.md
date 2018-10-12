@@ -172,7 +172,8 @@ int main(int argc, char* argv[])
   return EXIT_SUCCESS;
 }
 ```
-Compiling and running this test [mymain.c](mymain.c) will produce the following results.
+
+Compiling and running this test [sample-main.c](sample-main.c) will produce the following results.
 
 ```bash
 $ ./mymain 
@@ -181,8 +182,6 @@ $ ./mymain
 [SUCCESS] run test "anothertest.first" in 0.56 ms (status 0, wstatus 0)
 [SUCCESS] run test "anothertest.second" in 0.64 ms (status 0, wstatus 0)
 ```
-
-
 
 ---
 
