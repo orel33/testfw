@@ -19,6 +19,8 @@ Our test framework is made up of two libraries:
 * *libtestfw.a*: all the basic routines to discover, register and run tests (see API in [testfw.h](testfw.h)).
 * *libtestfw_main.a*: a *main()* routine to launch tests easily (optionnal).
 
+You can compile it by hand quite easily.
+
 ```bash
 gcc -std=c99 -Wall -g   -c -o testfw.o testfw.c
 ar rcs libtestfw.a testfw.o
@@ -26,14 +28,21 @@ gcc -std=c99 -Wall -g   -c -o testfw_main.o testfw_main.c
 ar rcs libtestfw_main.a testfw_main.o
 ```
 
-## Adding a First Test
+Or if you prefer, you can use the CMake build system ([CMakeLists.txt](CMakeLists.txt)).
 
-Adding a test is really simple, you just need to edit a new file *tests.c* and to include some test functions (with a "test_" suite) as follows:
+```bash
+mkdir build ; cd build
+cmake .. && make
+```
+
+## Writing a First Test
+
+Adding a test *hello* in a suite *test* (the default one) is really simple, you just need to write a function *test_hello()*
+with the following signature ([hello.c](hello.c)).
 
 ```c
 #include <stdio.h>
 #include <stdlib.h>
-#include "testfw.h"
 
 int test_hello(int argc, char* argv[])
 {
@@ -42,16 +51,25 @@ int test_hello(int argc, char* argv[])
 }
 ```
 
-And that's all!
-
-A success test should return EXIT_SUCCESS. All other cases are considered as a failure.
-
-More precisely, running a test returns one of the following status:
+A success test should allways return EXIT_SUCCESS. All other cases are considered as a failure. More precisely, running a test returns one of the following status:
 
 * SUCCESS: return EXIT_SUCCESS or 0 (normal exit)
 * FAILURE: return EXIT_FAILURE (or any value different of EXIT_SUCCESS)
 * KILLED: killed by any signal (SIGSEGV, SIGABRT, ...) except SIGALRM
 * TIMEOUT: killed by SIGALRM after timeout
+
+Compile it and run it.
+
+```bash
+$ gcc -std=c99 -Wall -g -c hello.c
+$ gcc hello.o -o hello -rdynamic -ltestfw_main -ltestfw -ldl -L.
+$ ./hello
+hello world
+[SUCCESS] run test "test.hello" in 0.46 ms (status 0, wstatus 0)
+```
+
+And that's all!
+
 
 ## Running Tests
 
@@ -73,7 +91,7 @@ Actions:
   -x: execute all registered tests
   -l: list all registered tests
 Options:
-  -r <suite.testname>: register a function "suite_testname()" as a test
+  -r <suite.name>: register a function "suite_name()" as a test
   -R <suite>: register all functions "suite_*()" as a test suite
   -o <logfile>: redirect test stdout & stderr to a log file
   -O: redirect test stdout & stderr to /dev/null
@@ -84,6 +102,17 @@ Options:
   -n: disable fork mode (no fork)
   -S: full silent mode (not only tests)
   -h: print this help message
+```
+
+List all available tests in *sample* suite:
+
+```bash
+$ ./sample -R sample -l
+sample.assert
+sample.failure
+sample.segfault
+sample.sleep
+sample.success
 ```
 
 Run the test suite "test" with some options (timeout = 2 seconds, log file = test.log):

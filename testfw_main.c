@@ -24,7 +24,7 @@ void usage(int argc, char *argv[])
     printf("  -x: execute all registered tests\n");
     printf("  -l: list all registered tests\n");
     printf("Options:\n");
-    printf("  -r <suite.testname>: register a function \"suite_testname()\" as a test\n");
+    printf("  -r <suite.name>: register a function \"suite_name()\" as a test\n");
     printf("  -R <suite>: register all functions \"suite_*()\" as a test suite\n");
     printf("  -o <logfile>: redirect test stdout & stderr to a log file\n");
     printf("  -O: redirect test stdout & stderr to /dev/null\n");
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     enum testfw_mode_t mode = TESTFW_FORK; // default mode
     enum action_t action = EXECUTE;        // default action
     char *suite = TESTFW_DEFAULT_SUITE;    // default suite
-    char *testname = NULL;
+    char *name = NULL;
 
     while ((opt = getopt(argc, argv, "r:R:t:TnsSco:Olxh?")) != -1)
     {
@@ -74,12 +74,12 @@ int main(int argc, char *argv[])
             }
             *sep = 0;
             suite = optarg;
-            testname = sep + 1;
+            name = sep + 1;
             break;
         }
         case 'R':
             suite = optarg;
-            testname = NULL;
+            name = NULL;
             break;
         // actions
         case 'x':
@@ -127,8 +127,8 @@ int main(int argc, char *argv[])
     struct testfw_t *fw = testfw_init(argv[0], timeout, logfile, silent);
 
     // register tests
-    if (suite && testname)
-        testfw_register_symb(fw, suite, testname);
+    if (suite && name)
+        testfw_register_symb(fw, suite, name);
     else if (suite)
         testfw_register_suite(fw, suite);
 
@@ -140,7 +140,6 @@ int main(int argc, char *argv[])
     }
     else if (action == EXECUTE)
     {
-        // nfailures = testfw_run_one(fw, suite, testname, testargc, testargv, mode);
         nfailures = testfw_run_all(fw, testargc, testargv, mode);
     }
     else
