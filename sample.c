@@ -21,6 +21,13 @@ int sample_segfault(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
+int sample_alarm(int argc, char *argv[])
+{
+    alarm(1);
+    pause(); // wait signal
+    return EXIT_SUCCESS;
+}
+
 int sample_assert(int argc, char* argv[])
 {
     assert(1 == 2);

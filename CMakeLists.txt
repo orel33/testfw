@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.2)
 include(CTest)
 enable_testing()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -rdynamic")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -std=c99 -rdynamic")
 
 add_library(testfw testfw.c testfw.h)
 target_link_libraries(testfw dl)

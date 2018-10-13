@@ -38,13 +38,6 @@ void usage(int argc, char *argv[])
     exit(EXIT_FAILURE);
 }
 
-/* ********** LIST ********** */
-
-void callback_list(struct test_t *test, void *data)
-{
-    printf("%s.%s\n", test->suite, test->name);
-}
-
 /* ********** MAIN ********** */
 
 int main(int argc, char *argv[])
@@ -68,7 +61,8 @@ int main(int argc, char *argv[])
         case 'r':
         {
             char *sep = strchr(optarg, '.');
-            if(!sep) {
+            if (!sep)
+            {
                 fprintf(stderr, "Error: invalid test name %s\n", optarg);
                 exit(EXIT_FAILURE);
             }
@@ -132,11 +126,21 @@ int main(int argc, char *argv[])
     else if (suite)
         testfw_register_suite(fw, suite);
 
+    int length = testfw_length(fw);
+    if (length == 0)
+    {
+        fprintf(stderr, "Error: no tests are registred in suite \"%s\"!\n", suite);
+        return EXIT_FAILURE;
+    }
+
     /* actions */
     int nfailures = 0;
     if (action == LIST)
     {
-        testfw_iterate_all(fw, callback_list, NULL);
+        for (int k = 0; k < length; k++) {
+            struct test_t *test = testfw_get(fw, k);
+            printf("%s.%s\n", test->suite, test->name);
+        }
     }
     else if (action == EXECUTE)
     {

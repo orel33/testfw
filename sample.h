@@ -17,6 +17,11 @@ int sample_failure(int argc, char *argv[]);
 int sample_segfault(int argc, char *argv[]);
 
 /**
+ * @brief test alarm signal
+ */
+int sample_alarm(int argc, char *argv[]);
+
+/**
  * @brief test assert
  */
 int sample_assert(int argc, char *argv[]);

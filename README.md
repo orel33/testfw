@@ -70,7 +70,6 @@ hello world
 
 And that's all!
 
-
 ## Running Tests
 
 Let's consider the code [sample.c](sample.c). To run all this tests, you need first to compile it and then to link it against our both libraries.
