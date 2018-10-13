@@ -5,9 +5,6 @@
 
 #include <stdbool.h>
 
-#define TESTFW_DEFAULT_SUITE "test"
-#define TESTFW_DEFAULT_TIMEOUT 2
-
 /* ********** TEST FRAMEWORK API ********** */
 
 enum testfw_mode_t

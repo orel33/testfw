@@ -9,6 +9,9 @@
 
 #include "testfw.h"
 
+#define DEFAULT_SUITE "test"
+#define DEFAULT_TIMEOUT 2
+
 enum action_t
 {
     EXECUTE,
@@ -28,7 +31,7 @@ void usage(int argc, char *argv[])
     printf("  -R <suite>: register all functions \"suite_*()\" as a test suite\n");
     printf("  -o <logfile>: redirect test stdout & stderr to a log file\n");
     printf("  -O: redirect test stdout & stderr to /dev/null\n");
-    printf("  -t <timeout>: set time limits for each test (in sec.) [default %d]\n", TESTFW_DEFAULT_TIMEOUT);
+    printf("  -t <timeout>: set time limits for each test (in sec.) [default %d]\n", DEFAULT_TIMEOUT);
     printf("  -T: no timeout\n");
     printf("  -c: return the total number of test failures\n");
     printf("  -s: silent mode\n");
@@ -45,12 +48,12 @@ int main(int argc, char *argv[])
     int opt;
 
     char *logfile = NULL;                  // test log (no log by default)
-    int timeout = TESTFW_DEFAULT_TIMEOUT;  // timeout (in sec.)
+    int timeout = DEFAULT_TIMEOUT;         // timeout (in sec.)
     bool count = false;                    // return nb failures
     bool silent = false;                   // silent mode
     enum testfw_mode_t mode = TESTFW_FORK; // default mode
     enum action_t action = EXECUTE;        // default action
-    char *suite = TESTFW_DEFAULT_SUITE;    // default suite
+    char *suite = DEFAULT_SUITE;           // default suite
     char *name = NULL;
 
     while ((opt = getopt(argc, argv, "r:R:t:TnsSco:Olxh?")) != -1)
@@ -137,7 +140,8 @@ int main(int argc, char *argv[])
     int nfailures = 0;
     if (action == LIST)
     {
-        for (int k = 0; k < length; k++) {
+        for (int k = 0; k < length; k++)
+        {
             struct test_t *test = testfw_get(fw, k);
             printf("%s.%s\n", test->suite, test->name);
         }
