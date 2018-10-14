@@ -7,10 +7,10 @@ The main features are:
 * test framework for C/C++ projects
 * a simple framework written in C, with few files to include in your project
 * framework developed in C on Linux (based on POSIX standard)
-* easy way to integrate your test with the TEST() macro, following the same philosophy as GoogleTest
+* easy way to integrate your tests, just by adding some *test_\*()* functions
 * support test with *argv* arguments
-* test executed in a child process (fork mode)
-* start the tests one by one or all at once
+* all tests are executed sequentially (one by one)
+* different execution modes: "fork", "thread" or "nofork"
 
 ## Compilation
 
@@ -55,8 +55,8 @@ A success test should allways return EXIT_SUCCESS. All other cases are considere
 
 * SUCCESS: return EXIT_SUCCESS or 0 (normal exit)
 * FAILURE: return EXIT_FAILURE (or any value different of EXIT_SUCCESS)
-* KILLED: killed by any signal (SIGSEGV, SIGABRT, ...) except SIGALRM
-* TIMEOUT: killed by SIGALRM after timeout
+* KILLED: killed by any signal (SIGSEGV, SIGABRT, ...)
+* TIMEOUT: after a time limit, return an exit status of 124 (following the convention used in *timeout* command)
 
 Compile it and run it.
 
@@ -84,63 +84,77 @@ The '-rdynamic' option is required to load all symbols in the dynamic symbol tab
 Then, launching the main routine provide you some helpful commands to run your tests. Usage:
 
 ```text
-$ ./sample -h
 Usage: ./sample [options] [actions] [-- <testargs> ...]
 Actions:
-  -x: execute all registered tests
+  -x: execute all registered tests (one by one, sequentially)
   -l: list all registered tests
 Options:
   -r <suite.name>: register a function "suite_name()" as a test
   -R <suite>: register all functions "suite_*()" as a test suite
-  -o <logfile>: redirect test stdout & stderr to a log file
+  -o <logfile>: redirect test output to a log file
   -O: redirect test stdout & stderr to /dev/null
-  -t <timeout>: set time limits for each test (in sec.) [default 1]
+  -t <timeout>: set time limits for each test (in sec.) [default 2]
   -T: no timeout
   -c: return the total number of test failures
-  -s: silent mode
-  -n: disable fork mode (no fork)
+  -s: silent test output
+  -m <mode>: set execution mode: "fork"|"thread"|"nofork" [default "fork"]
   -S: full silent mode (not only tests)
+  -v: print version
   -h: print this help message
 ```
 
-List all available tests in *sample* suite:
+List all available tests in the default suite (named *test*):
 
 ```bash
-$ ./sample -R sample -l
-sample.assert
-sample.failure
-sample.segfault
-sample.sleep
-sample.success
+$ ./sample -l
+test.alarm
+test.args
+test.assert
+test.failure
+test.infiniteloop
+test.segfault
+test.sleep
+test.success
 ```
 
-Run the test suite "test" with some options (timeout = 2 seconds, log file = test.log):
+To use another suite, use '-r/-R' options:
 
 ```bash
-$ ./sample -R sample -t 2 -O -x
-[KILLED] run test "sample.assert" in 0.57 ms (signal "Aborted", wstatus 6)
-[FAILURE] run test "sample.failure" in 0.48 ms (status 1, wstatus 256)
-[KILLED] run test "sample.segfault" in 0.45 ms (signal "Segmentation fault", wstatus 11)
-[TIMEOUT] run test "sample.sleep" in 1000.63 ms (signal "Alarm clock", wstatus 14)
-[SUCCESS] run test "sample.success" in 0.59 ms (status 0, wstatus 0)
+$ ./sample -R othertest -l
+othertest.failure
+othertest.success
+```
+
+Run your tests with some options (timeout = 2 seconds, log file = /dev/null):
+
+```bash
+$ ./sample -t 2 -O -x
+[KILLED] run test "test.alarm" in 1000.70 ms (signal "Alarm clock", wstatus 14)
+[SUCCESS] run test "test.args" in 0.59 ms (status 0, wstatus 0)
+[KILLED] run test "test.assert" in 0.58 ms (signal "Aborted", wstatus 6)
+[FAILURE] run test "test.failure" in 0.43 ms (status 1, wstatus 256)
+[TIMEOUT] run test "test.infiniteloop" in 2000.23 ms (status 124, wstatus 31744)
+[KILLED] run test "test.segfault" in 0.17 ms (signal "Segmentation fault", wstatus 11)
+[TIMEOUT] run test "test.sleep" in 2000.56 ms (status 124, wstatus 31744)
+[SUCCESS] run test "test.success" in 0.57 ms (status 0, wstatus 0)
 ```
 
 Run a single test in *fork* mode (default):
 
 ```bash
-$ ./sample -r sample.failure -x
-[FAILURE] run test "sample.failure" in 0.53 ms (status 1, wstatus 256)
+$ ./sample -m fork -r test.failure -x
+[FAILURE] run test "test.failure" in 0.43 ms (status 1, wstatus 256)
 $ echo $?
 0
 ```
 
-In the *fork* mode, each test is runned separately in child process... The failure of a test will not affect the execution of following tests.
+In the *fork* mode, each test is runned separately in a child process. The failure of a test will not affect the execution of following tests.
 
-Run a single test (in *nofork* mode):
+Now, let's run a single test in *nofork* mode:
 
 ```bash
-$ ./sample -r sample.failure -n -x
-[FAILURE] run test "sample.failure" in 0.53 ms (status 1, wstatus 256)
+$ ./sample -m nofork  -r test.failure -x
+[FAILURE] run test "test.failure" in 0.01 ms (status 1, wstatus 256)
 $ echo $?
 1
 ```
@@ -150,19 +164,16 @@ In the *nofork* mode, each test is runned *directly* as function call (without f
 And running tests.
 
 ```bash
-$ make && make test
-Running tests...
-Test project /home/orel/Documents/Teaching/ProjetTechno/GIT/testfw/build
-    Start 1: sample.success
-1/5 Test #1: sample.success ...................   Passed    0.00 sec
-    Start 2: sample.failure
-2/5 Test #2: sample.failure ...................***Failed    0.00 sec
-    Start 3: sample.segfault
-3/5 Test #3: sample.segfault ..................***Exception: SegFault  0.00 sec
-    Start 4: sample.assert
-4/5 Test #4: sample.assert ....................***Exception: Child aborted  0.00 sec
-    Start 5: sample.sleep
-5/5 Test #5: sample.sleep .....................***Timeout   2.01 sec
+cmake . && make && make test
+```
+
+You can also pass arguments à la *argv* s follows.
+
+```bash
+$ ./sample -r test.args -- a b c
+argc: 3
+argv: a b c
+[SUCCESS] run test "test.args" in 0.45 ms (status 0, wstatus 0)
 ```
 
 ## Main Routine
@@ -182,9 +193,9 @@ A *main()* routine is already provided for convenience in the *libtestfw_main.a*
 int main(int argc, char *argv[])
 {
     struct testfw_t *fw = testfw_init(argv[0], TIMEOUT, LOGFILE, SILENT);
-    testfw_register_func(fw, "sample", "success", sample_success);
-    testfw_register_symb(fw, "sample", "failure");
-    testfw_register_suite(fw, "othersample");
+    testfw_register_func(fw, "test", "success", test_success);
+    testfw_register_symb(fw, "test", "failure");
+    testfw_register_suite(fw, "othertest");
     testfw_run_all(fw, argc - 1, argv + 1, TESTFW_FORK);
     testfw_free(fw);
     return EXIT_SUCCESS;

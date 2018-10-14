@@ -7,6 +7,12 @@
 
 /* ********** TEST FRAMEWORK API ********** */
 
+#define TESTFW_VERSION_MAJOR 0
+#define TESTFW_VERSION_MINOR 1
+# define TESTFW_EXIT_SUCCESS EXIT_SUCCESS
+# define TESTFW_EXIT_FAILURE EXIT_FAILURE
+# define TESTFW_EXIT_TIMEOUT 124
+
 enum testfw_mode_t
 {
     TESTFW_FORK,

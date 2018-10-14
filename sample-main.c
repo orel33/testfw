@@ -10,9 +10,9 @@
 int main(int argc, char *argv[])
 {
     struct testfw_t *fw = testfw_init(argv[0], TIMEOUT, LOGFILE, SILENT);
-    testfw_register_func(fw, "sample", "success", sample_success);
-    testfw_register_symb(fw, "sample", "failure");
-    testfw_register_suite(fw, "othersample");
+    testfw_register_func(fw, "test", "success", test_success);
+    testfw_register_symb(fw, "test", "failure");
+    testfw_register_suite(fw, "othertest");
     testfw_run_all(fw, argc - 1, argv + 1, TESTFW_FORK);
     testfw_free(fw);
     return EXIT_SUCCESS;

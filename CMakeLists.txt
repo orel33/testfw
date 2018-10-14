@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.2)
 include(CTest)
 enable_testing()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -std=c99 -rdynamic")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -fPIC -std=c99")
+set(CMAKE_LD_FLAGS "${CMAKE_LD_FLAGS} -rdynamic")
 
 add_library(testfw testfw.c testfw.h)
 target_link_libraries(testfw dl)
@@ -22,9 +23,9 @@ add_executable(sample_main sample_main.c sample.c sample.h)
 target_link_libraries(sample_main testfw)
 
 # launch test directly using CTest
-set(tests "sample.success" "sample.failure" "sample.segfault" "sample.assert" "sample.sleep")
+set(tests "test.success" "test.failure" "test.segfault" "test.assert" "test.sleep" "test.alarm" "test.args" "test.infiniteloop")
 foreach(test ${tests})
-add_test(${test} sample -n -r ${test})
+add_test(${test} sample  -m nofork -r ${test} -x)
 set_tests_properties (${test} PROPERTIES TIMEOUT 2)
 endforeach()
 

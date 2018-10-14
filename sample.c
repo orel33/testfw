@@ -1,52 +1,68 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
 
 #include "sample.h"
 
-
-int sample_success(int argc, char* argv[])
+int test_success(int argc, char *argv[])
 {
     return EXIT_SUCCESS;
 }
 
-int sample_failure(int argc, char* argv[])
+int test_failure(int argc, char *argv[])
 {
     return EXIT_FAILURE;
 }
 
-int sample_segfault(int argc, char* argv[])
+int test_segfault(int argc, char *argv[])
 {
-    *((int *)0) = 0;   // segfault!
+    *((int *)0) = 0; // segfault!
     return EXIT_SUCCESS;
 }
 
-int sample_alarm(int argc, char *argv[])
+int test_alarm(int argc, char *argv[])
 {
     alarm(1);
     pause(); // wait signal
     return EXIT_SUCCESS;
 }
 
-int sample_assert(int argc, char* argv[])
+int test_assert(int argc, char *argv[])
 {
     assert(1 == 2);
     return EXIT_SUCCESS;
 }
 
-int sample_sleep(int argc, char* argv[])
+int test_sleep(int argc, char *argv[])
 {
-    sleep(10);         // 10 seconds
+    sleep(4); // in seconds
     return EXIT_SUCCESS;
 }
 
-
-int othersample_negret(int argc, char* argv[])
+int test_infiniteloop(int argc, char *argv[])
 {
-    return -1;
+    while (1)
+        ;
+    return EXIT_SUCCESS;
 }
 
-int othersample_posret(int argc, char* argv[])
+int test_args(int argc, char *argv[])
 {
-    return 2;
+    printf("argc: %d\n", argc);
+    printf("argv: ");
+    for (int i = 0; i < argc; i++)
+        printf("%s ", argv[i]);
+    printf("\n");
+    return EXIT_SUCCESS;
+}
+
+int othertest_success(int argc, char *argv[])
+{
+    return EXIT_SUCCESS;
+}
+
+int othertest_failure(int argc, char *argv[])
+{
+    return EXIT_FAILURE;
 }

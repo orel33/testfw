@@ -3,12 +3,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <assert.h>
 #include <getopt.h>
 
 #include "testfw.h"
 
+#define DEFAULT_MODE "fork"
 #define DEFAULT_SUITE "test"
 #define DEFAULT_TIMEOUT 2
 
@@ -24,19 +26,20 @@ void usage(int argc, char *argv[])
 {
     printf("Usage: %s [options] [actions] [-- <testargs> ...]\n", argv[0]);
     printf("Actions:\n");
-    printf("  -x: execute all registered tests\n");
+    printf("  -x: execute all registered tests (one by one, sequentially)\n");
     printf("  -l: list all registered tests\n");
     printf("Options:\n");
     printf("  -r <suite.name>: register a function \"suite_name()\" as a test\n");
     printf("  -R <suite>: register all functions \"suite_*()\" as a test suite\n");
-    printf("  -o <logfile>: redirect test stdout & stderr to a log file\n");
+    printf("  -o <logfile>: redirect test output to a log file\n");
     printf("  -O: redirect test stdout & stderr to /dev/null\n");
     printf("  -t <timeout>: set time limits for each test (in sec.) [default %d]\n", DEFAULT_TIMEOUT);
     printf("  -T: no timeout\n");
     printf("  -c: return the total number of test failures\n");
-    printf("  -s: silent mode\n");
-    printf("  -n: disable fork mode (no fork)\n");
+    printf("  -s: silent test output\n");
+    printf("  -m <mode>: set execution mode: \"fork\"|\"thread\"|\"nofork\" [default \"%s\"]\n", DEFAULT_MODE);
     printf("  -S: full silent mode (not only tests)\n");
+    printf("  -v: print version\n");
     printf("  -h: print this help message\n");
     exit(EXIT_FAILURE);
 }
@@ -56,7 +59,7 @@ int main(int argc, char *argv[])
     char *suite = DEFAULT_SUITE;           // default suite
     char *name = NULL;
 
-    while ((opt = getopt(argc, argv, "r:R:t:TnsSco:Olxh?")) != -1)
+    while ((opt = getopt(argc, argv, "vr:R:t:Tm:sSco:Olxh?")) != -1)
     {
         switch (opt)
         {
@@ -66,7 +69,7 @@ int main(int argc, char *argv[])
             char *sep = strchr(optarg, '.');
             if (!sep)
             {
-                fprintf(stderr, "Error: invalid test name %s\n", optarg);
+                fprintf(stderr, "Error: invalid test name \"%s\"!\n", optarg);
                 exit(EXIT_FAILURE);
             }
             *sep = 0;
@@ -108,8 +111,22 @@ int main(int argc, char *argv[])
         case 'T':
             timeout = 0; // no timeout
             break;
-        case 'n':
-            mode = TESTFW_NOFORK;
+        case 'm':
+            if (strcmp(optarg, "fork") == 0)
+                mode = TESTFW_FORK;
+            else if (strcmp(optarg, "nofork") == 0)
+                mode = TESTFW_NOFORK;
+            else if (strcmp(optarg, "thread") == 0)
+                mode = TESTFW_THREAD;
+            else
+            {
+                fprintf(stderr, "Error: invalid execution mode \"%s\"!\n", optarg);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        case 'v':
+            printf("Version %d.%d\n", TESTFW_VERSION_MAJOR, TESTFW_VERSION_MINOR);
+            exit(EXIT_SUCCESS);
             break;
         case '?':
         case 'h':
