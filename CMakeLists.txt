@@ -1,11 +1,22 @@
 PROJECT("TESTFW" C)
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 2.6)
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# set default build type
+if(NOT CMAKE_BUILD_TYPE)
+     message(STATUS "No build type selected, set default to RELEASE")
+     set(CMAKE_BUILD_TYPE "RELEASE" CACHE STRING "Build Type" FORCE)
+endif()
 
 include(CTest)
 enable_testing()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -fPIC -std=c99")
-set(CMAKE_LD_FLAGS "${CMAKE_LD_FLAGS} -rdynamic")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -std=c99")
+# set(CMAKE_LD_FLAGS "${CMAKE_LD_FLAGS} -rdynamic")
+
+set(CMAKE_C_FLAGS "-Wall -fPIC -std=c99")
+set(CMAKE_LD_FLAGS "-rdynamic")
 
 add_library(testfw testfw.c testfw.h)
 target_link_libraries(testfw dl)
