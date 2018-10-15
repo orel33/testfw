@@ -48,7 +48,7 @@ struct testfw_t *testfw_init(char *program, int timeout, char *logfile, bool sil
 void testfw_free(struct testfw_t *fw);
 
 /**
- * @brief get number of registred tests
+ * @brief get number of registered tests
  * 
  * @param fw 
  * @return int 
@@ -56,7 +56,7 @@ void testfw_free(struct testfw_t *fw);
 int testfw_length(struct testfw_t *fw);
 
 /**
- * @brief get a registred test
+ * @brief get a registered test
  * 
  * @param fw 
  * @param k 
@@ -95,7 +95,7 @@ struct test_t *testfw_register_symb(struct testfw_t *fw, char *suite, char *name
 int testfw_register_suite(struct testfw_t *fw, char *suite);
 
 /**
- * @brief run all registred tests
+ * @brief run all registered tests
  * 
  * @param fw 
  * @param testargc 
