@@ -41,7 +41,7 @@ set_tests_properties (${test} PROPERTIES TIMEOUT 2)
 endforeach()
 
 # launch tests within TESTFW
-add_test(sample_all sample -R sample -x)
+add_test(sample_all sample -x)
 add_test(sample_main sample_main)
 
 

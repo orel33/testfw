@@ -5,4 +5,3 @@
 * run test or test suite in parallel
 * implement thread support
 * add a CMake function to automatically add all TESTFW tests as CTest tests
-* print final status à la CTest : "86% tests passed, 1 tests failed out of 7"

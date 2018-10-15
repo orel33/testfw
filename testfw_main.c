@@ -170,6 +170,9 @@ int main(int argc, char *argv[])
     else
         usage(argc, argv);
 
+    /* final diagnostic */
+    printf("=> %.f%% tests passed, %d tests failed out of %d\n", nfailures * 100.0 / length, length - nfailures, length);
+
     /* free tests */
     testfw_free(fw);
 
