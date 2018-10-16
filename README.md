@@ -6,7 +6,7 @@ The main features are:
 
 * test framework for C/C++ projects
 * a simple framework written in C, with few files to include in your project
-* framework developed in C on Linux (based on POSIX standard)
+* framework developed on Linux system based on POSIX standard, as far as possible
 * easy way to integrate your tests, just by adding some *test_\*()* functions
 * support test with *argv* arguments
 * all tests are executed sequentially (one by one)
@@ -54,7 +54,7 @@ int test_hello(int argc, char* argv[])
 A success test should allways return EXIT_SUCCESS. All other cases are considered as a failure. More precisely, running a test returns one of the following status:
 
 * SUCCESS: return EXIT_SUCCESS or 0 (normal exit)
-* FAILURE: return EXIT_FAILURE (or any value different of EXIT_SUCCESS)
+* FAILURE: return EXIT_FAILURE or 1 (or any value different of EXIT_SUCCESS)
 * KILLED: killed by any signal (SIGSEGV, SIGABRT, ...)
 * TIMEOUT: after a time limit, return an exit status of 124 (following the convention used in *timeout* command)
 
@@ -65,7 +65,8 @@ $ gcc -std=c99 -Wall -g -c hello.c
 $ gcc hello.o -o hello -rdynamic -ltestfw_main -ltestfw -ldl -L.
 $ ./hello
 hello world
-[SUCCESS] run test "test.hello" in 0.46 ms (status 0, wstatus 0)
+[SUCCESS] run test "test.hello" in 0.52 ms (status 0, wstatus 0)
+=> 0% tests passed, 1 tests failed out of 1
 ```
 
 And that's all!
@@ -129,14 +130,15 @@ Run your tests with some options (timeout = 2 seconds, log file = /dev/null):
 
 ```bash
 $ ./sample -t 2 -O -x
-[KILLED] run test "test.alarm" in 1000.70 ms (signal "Alarm clock", wstatus 14)
-[SUCCESS] run test "test.args" in 0.59 ms (status 0, wstatus 0)
-[KILLED] run test "test.assert" in 0.58 ms (signal "Aborted", wstatus 6)
-[FAILURE] run test "test.failure" in 0.43 ms (status 1, wstatus 256)
-[TIMEOUT] run test "test.infiniteloop" in 2000.23 ms (status 124, wstatus 31744)
-[KILLED] run test "test.segfault" in 0.17 ms (signal "Segmentation fault", wstatus 11)
-[TIMEOUT] run test "test.sleep" in 2000.56 ms (status 124, wstatus 31744)
-[SUCCESS] run test "test.success" in 0.57 ms (status 0, wstatus 0)
+[KILLED] run test "test.alarm" in 1000.52 ms (signal "Alarm clock", wstatus 14)
+[SUCCESS] run test "test.args" in 0.50 ms (status 0, wstatus 0)
+[KILLED] run test "test.assert" in 0.56 ms (signal "Aborted", wstatus 6)
+[FAILURE] run test "test.failure" in 0.51 ms (status 1, wstatus 256)
+[TIMEOUT] run test "test.infiniteloop" in 2000.35 ms (status 124, wstatus 31744)
+[KILLED] run test "test.segfault" in 0.15 ms (signal "Segmentation fault", wstatus 11)
+[TIMEOUT] run test "test.sleep" in 2000.49 ms (status 124, wstatus 31744)
+[SUCCESS] run test "test.success" in 0.51 ms (status 0, wstatus 0)
+=> 75% tests passed, 2 tests failed out of 8
 ```
 
 Run a single test in *fork* mode (default):
@@ -144,6 +146,7 @@ Run a single test in *fork* mode (default):
 ```bash
 $ ./sample -m fork -r test.failure -x
 [FAILURE] run test "test.failure" in 0.43 ms (status 1, wstatus 256)
+=> 100% tests passed, 0 tests failed out of 1
 $ echo $?
 0
 ```
@@ -171,9 +174,10 @@ You can also pass arguments à la *argv* s follows.
 
 ```bash
 $ ./sample -r test.args -- a b c
-argc: 3
-argv: a b c
+argc: 3, argv: a b c
 [SUCCESS] run test "test.args" in 0.45 ms (status 0, wstatus 0)
+=> 0% tests passed, 1 tests failed out of 1
+
 ```
 
 ## Main Routine
@@ -207,10 +211,10 @@ Compiling and running this test will produce the following results.
 ```bash
 $ gcc -std=c99 -rdynamic -Wall sample.c sample_main.c -o sample_main -ltestfw -ldl -L.
 $ ./sample_main
-[SUCCESS] run test "sample.success" in 0.41 ms (status 0, wstatus 0)
-[FAILURE] run test "sample.failure" in 0.52 ms (status 1, wstatus 256)
-[FAILURE] run test "othersample.negret" in 0.52 ms (status 255, wstatus 65280)
-[FAILURE] run test "othersample.posret" in 0.52 ms (status 2, wstatus 512)
+[SUCCESS] run test "test.success" in 0.24 ms (status 0, wstatus 0)
+[FAILURE] run test "test.failure" in 0.29 ms (status 1, wstatus 256)
+[FAILURE] run test "othertest.failure" in 0.09 ms (status 1, wstatus 256)
+[SUCCESS] run test "othertest.success" in 0.17 ms (status 0, wstatus 0)
 ```
 
 ---

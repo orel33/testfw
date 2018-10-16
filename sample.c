@@ -49,7 +49,7 @@ int test_infiniteloop(int argc, char *argv[])
 
 int test_args(int argc, char *argv[])
 {
-    printf("argc: %d\n", argc);
+    printf("argc: %d, ", argc);
     printf("argv: ");
     for (int i = 0; i < argc; i++)
         printf("%s ", argv[i]);
