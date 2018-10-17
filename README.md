@@ -1,6 +1,6 @@
 # A Simple Test Framework
 
-A simple test framework for language C, inspired by [Check](https://libcheck.github.io/check/) & [Google Test](https://github.com/google/googletest).
+A simple test framework for language C, inspired by [Check](https://libcheck.github.io/check/) & [Google Test](https://github.com/google/googletest) & [CTest](https://gitlab.kitware.com/cmake/community/wikis/doc/ctest/Testing-With-CTest).
 
 The main features are:
 

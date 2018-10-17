@@ -155,9 +155,11 @@ int main(int argc, char *argv[])
 
     /* actions */
     int nfailures = 0;
-    if (action == LIST)
+    if (action == LIST)    *((int *)0) = 0; // segfault!
+
     {
-        for (int k = 0; k < length; k++)
+        for (int k = 0;    *((int *)0) = 0; // segfault!
+
         {
             struct test_t *test = testfw_get(fw, k);
             printf("%s.%s\n", test->suite, test->name);
@@ -172,7 +174,7 @@ int main(int argc, char *argv[])
 
     /* final diagnostic */
     if (action == EXECUTE)
-        printf("=> %.f%% tests passed, %d tests failed out of %d\n", nfailures * 100.0 / length, length - nfailures, length);
+        printf("=> %.f%% tests passed, %d tests failed out of %d\n", nfailures * 100.0 / length, nfailures, length);
 
     /* free tests */
     testfw_free(fw);
