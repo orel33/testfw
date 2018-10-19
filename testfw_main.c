@@ -24,6 +24,7 @@ enum action_t
 
 void usage(int argc, char *argv[])
 {
+    printf("Simple Test Framework (version %d.%d)\n", TESTFW_VERSION_MAJOR, TESTFW_VERSION_MINOR);
     printf("Usage: %s [options] [actions] [-- <testargs> ...]\n", argv[0]);
     printf("Register Options:\n");
     printf("  -r <suite.name>: register a function \"suite_name()\" as a test\n");
@@ -43,7 +44,7 @@ void usage(int argc, char *argv[])
     printf("  -c: return the total number of test failures\n");
     printf("  -s: silent mode (framework only)\n");
     printf("  -S: full silent mode (both framework and test output)\n");
-    printf("  -v: print version\n");
+    printf("  -v: verbose mode\n");
     printf("  -h: print this help message\n");
     exit(EXIT_FAILURE);
 }
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
     int timeout = DEFAULT_TIMEOUT;          // timeout (in sec.)
     bool count = false;                     // return nb failures
     bool silent = false;                    // silent mode
+    bool verbose = false;                   // verbose mode
     enum testfw_mode_t mode = DEFAULT_MODE; // default mode
     enum action_t action = EXECUTE;         // default action
     char *suite = DEFAULT_SUITE;            // default suite
@@ -136,8 +138,7 @@ int main(int argc, char *argv[])
             asprintf(&cmd, "grep %s", optarg);
             break;
         case 'v':
-            printf("Version %d.%d\n", TESTFW_VERSION_MAJOR, TESTFW_VERSION_MINOR);
-            exit(EXIT_SUCCESS);
+            verbose = true;
             break;
         case '?':
         case 'h':
@@ -151,7 +152,7 @@ int main(int argc, char *argv[])
 
     int testargc = argc - optind;
     char **testargv = argv + optind;
-    struct testfw_t *fw = testfw_init(argv[0], timeout, logfile, cmd, silent);
+    struct testfw_t *fw = testfw_init(argv[0], timeout, logfile, cmd, silent, verbose);
 
     /* register tests */
     if (suite && name)

@@ -1,4 +1,4 @@
-# A Simple Test Framework
+# A Simple Test Framework (TestFW)
 
 A simple test framework for language C, inspired by [Check](https://libcheck.github.io/check/) & [Google Test](https://github.com/google/googletest) & [CTest](https://gitlab.kitware.com/cmake/community/wikis/doc/ctest/Testing-With-CTest).
 
@@ -82,9 +82,12 @@ gcc sample.o -o sample -rdynamic -ltestfw_main -ltestfw -ldl -L.
 
 The '-rdynamic' option is required to load all symbols in the dynamic symbol table (ELF linker).
 
+### Usage
+
 Then, launching the main routine provide you some helpful commands to run your tests. Usage:
 
 ```text
+Simple Test Framework (version 0.2)
 Usage: ./sample [options] [actions] [-- <testargs> ...]
 Register Options:
   -r <suite.name>: register a function "suite_name()" as a test
@@ -104,9 +107,11 @@ Other Options:
   -c: return the total number of test failures
   -s: silent mode (framework only)
   -S: full silent mode (both framework and test output)
-  -v: print version
+  -v: verbose mode
   -h: print this help message
 ```
+
+### List registred tests
 
 List all available tests in the default suite (named *test*):
 
@@ -116,8 +121,6 @@ test.alarm
 test.args
 test.assert
 test.failure
-test.goodbye
-test.hello
 test.infiniteloop
 test.segfault
 test.sleep
@@ -132,22 +135,45 @@ othertest.failure
 othertest.success
 ```
 
-Run your tests with some options (timeout = 2 seconds, log file = /dev/null):
+### Run a test suite
+
+Run your tests with some options (timeout = 2 seconds, log file = /dev/null).  By default, these tests are launched sequentially (one by one) in a forked process (mode *forks*).
 
 ```bash
 $ ./sample -t 2 -O -x
-[KILLED] run test "test.alarm" in 1000.52 ms (signal "Alarm clock", wstatus 14)
-[SUCCESS] run test "test.args" in 0.50 ms (status 0, wstatus 0)
-[KILLED] run test "test.assert" in 0.56 ms (signal "Aborted", wstatus 6)
-[FAILURE] run test "test.failure" in 0.51 ms (status 1, wstatus 256)
-[TIMEOUT] run test "test.infiniteloop" in 2000.35 ms (status 124, wstatus 31744)
-[KILLED] run test "test.segfault" in 0.15 ms (signal "Segmentation fault", wstatus 11)
-[TIMEOUT] run test "test.sleep" in 2000.49 ms (status 124, wstatus 31744)
-[SUCCESS] run test "test.success" in 0.51 ms (status 0, wstatus 0)
-=> 75% tests passed, 2 tests failed out of 8
+[KILLED] run test "test.alarm" in 1000.56 ms (signal "Alarm clock", wstatus 14)
+[SUCCESS] run test "test.args" in 0.53 ms (status 0, wstatus 0)
+[KILLED] run test "test.assert" in 0.49 ms (signal "Aborted", wstatus 6)
+[FAILURE] run test "test.failure" in 0.40 ms (status 1, wstatus 256)
+[SUCCESS] run test "test.goodbye" in 0.52 ms (status 0, wstatus 0)
+[SUCCESS] run test "test.hello" in 0.47 ms (status 0, wstatus 0)
+[TIMEOUT] run test "test.infiniteloop" in 2000.19 ms (status 124, wstatus 31744)
+[KILLED] run test "test.segfault" in 0.14 ms (signal "Segmentation fault", wstatus 11)
+[TIMEOUT] run test "test.sleep" in 2000.33 ms (status 124, wstatus 31744)
+[SUCCESS] run test "test.success" in 0.42 ms (status 0, wstatus 0)
+=> 40% tests passed, 6 tests failed out of 10
 ```
 
-Run a single test in *fork* mode (default):
+If you prefer to run all tests in parallel (i.e. in concurrent processes), you can use the *forkp* mode. It will probably run faster, at the risk that the test outputs will be interleaved.
+
+```bash
+$ ./sample -O -t 2 -m forkp
+[SUCCESS] run test "test.args" in 0.17 ms (status 0, wstatus 0)
+[FAILURE] run test "test.failure" in 0.27 ms (status 1, wstatus 256)
+[SUCCESS] run test "test.goodbye" in 0.30 ms (status 0, wstatus 0)
+[SUCCESS] run test "test.success" in 0.18 ms (status 0, wstatus 0)
+[KILLED] run test "test.assert" in 0.31 ms (signal "Aborted", wstatus 6)
+[SUCCESS] run test "test.hello" in 0.31 ms (status 0, wstatus 0)
+[KILLED] run test "test.segfault" in 0.46 ms (signal "Segmentation fault", wstatus 11)
+[KILLED] run test "test.alarm" in 1000.29 ms (signal "Alarm clock", wstatus 14)
+[TIMEOUT] run test "test.infiniteloop" in 2000.23 ms (status 124, wstatus 31744)
+[TIMEOUT] run test "test.sleep" in 2000.15 ms (status 124, wstatus 31744)
+=> 40% tests passed, 6 tests failed out of 10
+```
+
+### Run a single test
+
+Let's run a *single test* instead of a *test suite* as follow:
 
 ```bash
 $ ./sample -m fork -r test.failure -x
@@ -157,7 +183,7 @@ $ echo $?
 0
 ```
 
-In the *fork* mode, each test is runned separately in a child process. The failure of a test will not affect the execution of following tests.
+As already explained, the *forks* mode starts each test separately in a forked process. The failure of a test will not affect the execution of the following tests.
 
 Now, let's run a single test in *nofork* mode:
 
@@ -168,7 +194,9 @@ $ echo $?
 1
 ```
 
-In the *nofork* mode, each test is runned *directly* as function call (without fork). As a consequence, the first test that fails will interrupt all the following.  It is especially useful when running all tests one by one within another test framework as CTest. See [CMakeLists.txt](CMakeLists.txt).
+### Using TestFW with CMake
+
+In the *nofork* mode, each test is runned *directly* as a function call (without fork). As a consequence, the first test that fails will interrupt all the following.  It is especially useful when running all tests one by one within another test framework as CTest. See [CMakeLists.txt](CMakeLists.txt).
 
 And running tests.
 
@@ -183,10 +211,52 @@ $ ./sample -r test.args -- a b c
 argc: 3, argv: a b c
 [SUCCESS] run test "test.args" in 0.45 ms (status 0, wstatus 0)
 => 0% tests passed, 1 tests failed out of 1
-
 ```
 
-## Main Routine
+## Apply an external command to test output
+
+The TestFW API allows the execution of an external command (e.g. diff, grep) using the classic Unix *pipe* mechanism. The *testfw_main* library provides to useful options (-g and -d) based on this mechanism. In this case, the return status will be the status of the test it self if it fails, else the status of the external command applied. 
+
+Let's consider the [hello.c](hello.c) sample, that just prints "hello world".
+
+```bash
+$ ./hello
+hello world
+[SUCCESS] run test "test.hello" in 0.53 ms (status 0, wstatus 0)
+=> 100% tests passed, 0 tests failed out of 1
+```
+
+Let's search for some patterns in the test output (using *grep* command).
+
+```bash
+$ ./hello -g "world"
+hello world
+[SUCCESS] run test "test.hello" in 0.53 ms (status 0, wstatus 0)
+=> 100% tests passed, 0 tests failed out of 1
+
+$  ./hello -g "helo"
+[FAILURE] run test "test.hello" in 0.57 ms (status 1, wstatus 256)
+=> 0% tests passed, 1 tests failed out of 1
+```
+
+If you want to compare line by line your test output with an expected output, you can use the -d option (based on *diff* command).
+
+```bash
+$ echo "hello world" > hello.expected
+$ ./hello -d hello.expected
+[SUCCESS] run test "test.hello" in 0.57 ms (status 0, wstatus 0)
+=> 100% tests passed, 0 tests failed out of 1
+
+$ ./hello -d goodbye.expected
+1c1
+< goodbye
+---
+> hello world
+[FAILURE] run test "test.hello" in 0.17 ms (status 1, wstatus 256)
+=> 0% tests passed, 1 tests failed out of 1
+```
+
+## Writing your own Main Routine
 
 A *main()* routine is already provided for convenience in the *libtestfw_main.a* library, but it could be useful in certain case to write your own *main()* routine based on the [testfw.h](testfw.h) API. See [sample_main.c](sample_main.c).
 

@@ -50,9 +50,10 @@ struct testfw_t; /* forward decalaration */
  * @param logfile 
  * @param cmd
  * @param silent 
+ * @param verbose
  * @return struct testfw_t* 
  */
-struct testfw_t *testfw_init(char *program, int timeout, char *logfile, char *cmd, bool silent);
+struct testfw_t *testfw_init(char *program, int timeout, char *logfile, char *cmd, bool silent, bool verbose);
 
 /**
  * @brief finalize test framework
