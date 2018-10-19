@@ -86,20 +86,24 @@ Then, launching the main routine provide you some helpful commands to run your t
 
 ```text
 Usage: ./sample [options] [actions] [-- <testargs> ...]
-Actions:
-  -x: execute all registered tests (one by one, sequentially)
-  -l: list all registered tests
-Options:
+Register Options:
   -r <suite.name>: register a function "suite_name()" as a test
   -R <suite>: register all functions "suite_*()" as a test suite
+Actions:
+  -x: execute all registered tests (default action)
+  -l: list all registered tests
+Execution Options:
+  -m <mode>: set execution mode: "forks"|"forkp"|"nofork" [default "forks"]
+  -d <file>: compare test output with an expected file (using diff)
+  -g <pattern>: search for a pattern in test output (using grep)
+Other Options:
   -o <logfile>: redirect test output to a log file
   -O: redirect test stdout & stderr to /dev/null
   -t <timeout>: set time limits for each test (in sec.) [default 2]
   -T: no timeout
   -c: return the total number of test failures
-  -s: silent test output
-  -m <mode>: set execution mode: "fork"|"thread"|"nofork" [default "fork"]
-  -S: full silent mode (not only tests)
+  -s: silent mode (framework only)
+  -S: full silent mode (both framework and test output)
   -v: print version
   -h: print this help message
 ```
@@ -112,6 +116,8 @@ test.alarm
 test.args
 test.assert
 test.failure
+test.goodbye
+test.hello
 test.infiniteloop
 test.segfault
 test.sleep
