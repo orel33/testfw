@@ -10,7 +10,7 @@
 
 #include "testfw.h"
 
-#define DEFAULT_MODE "fork"
+#define DEFAULT_MODE TESTFW_FORKS
 #define DEFAULT_SUITE "test"
 #define DEFAULT_TIMEOUT 2
 
@@ -25,20 +25,24 @@ enum action_t
 void usage(int argc, char *argv[])
 {
     printf("Usage: %s [options] [actions] [-- <testargs> ...]\n", argv[0]);
-    printf("Actions:\n");
-    printf("  -x: execute all registered tests (one by one, sequentially)\n");
-    printf("  -l: list all registered tests\n");
-    printf("Options:\n");
+    printf("Register Options:\n");
     printf("  -r <suite.name>: register a function \"suite_name()\" as a test\n");
     printf("  -R <suite>: register all functions \"suite_*()\" as a test suite\n");
+    printf("Actions:\n");
+    printf("  -x: execute all registered tests (default action)\n");
+    printf("  -l: list all registered tests\n");
+    printf("Execution Options:\n");
+    printf("  -m <mode>: set execution mode: \"forks\"|\"forkp\"|\"nofork\" [default \"forks\"]\n");
+    printf("  -d <file>: compare test output with an expected file (using diff)\n");
+    printf("  -g <pattern>: search for a pattern in test output (using grep)\n");
+    printf("Other Options:\n");
     printf("  -o <logfile>: redirect test output to a log file\n");
     printf("  -O: redirect test stdout & stderr to /dev/null\n");
     printf("  -t <timeout>: set time limits for each test (in sec.) [default %d]\n", DEFAULT_TIMEOUT);
     printf("  -T: no timeout\n");
     printf("  -c: return the total number of test failures\n");
-    printf("  -s: silent test output\n");
-    printf("  -m <mode>: set execution mode: \"fork\"|\"thread\"|\"nofork\" [default \"%s\"]\n", DEFAULT_MODE);
-    printf("  -S: full silent mode (not only tests)\n");
+    printf("  -s: silent mode (framework only)\n");
+    printf("  -S: full silent mode (both framework and test output)\n");
     printf("  -v: print version\n");
     printf("  -h: print this help message\n");
     exit(EXIT_FAILURE);
@@ -50,16 +54,17 @@ int main(int argc, char *argv[])
 {
     int opt;
 
-    char *logfile = NULL;                  // test log (no log by default)
-    int timeout = DEFAULT_TIMEOUT;         // timeout (in sec.)
-    bool count = false;                    // return nb failures
-    bool silent = false;                   // silent mode
-    enum testfw_mode_t mode = TESTFW_FORK; // default mode
-    enum action_t action = EXECUTE;        // default action
-    char *suite = DEFAULT_SUITE;           // default suite
+    char *logfile = NULL;                   // defaul logfile (no log)
+    char *cmd = NULL;                       // default external command (no command)
+    int timeout = DEFAULT_TIMEOUT;          // timeout (in sec.)
+    bool count = false;                     // return nb failures
+    bool silent = false;                    // silent mode
+    enum testfw_mode_t mode = DEFAULT_MODE; // default mode
+    enum action_t action = EXECUTE;         // default action
+    char *suite = DEFAULT_SUITE;            // default suite
     char *name = NULL;
 
-    while ((opt = getopt(argc, argv, "vr:R:t:Tm:sSco:Olxh?")) != -1)
+    while ((opt = getopt(argc, argv, "g:d:vr:R:t:Tm:sSco:Olxh?")) != -1)
     {
         switch (opt)
         {
@@ -112,17 +117,23 @@ int main(int argc, char *argv[])
             timeout = 0; // no timeout
             break;
         case 'm':
-            if (strcmp(optarg, "fork") == 0)
-                mode = TESTFW_FORK;
+            if (strcmp(optarg, "forks") == 0)
+                mode = TESTFW_FORKS;
+            else if (strcmp(optarg, "forkp") == 0)
+                mode = TESTFW_FORKP;
             else if (strcmp(optarg, "nofork") == 0)
                 mode = TESTFW_NOFORK;
-            else if (strcmp(optarg, "thread") == 0)
-                mode = TESTFW_THREAD;
             else
             {
                 fprintf(stderr, "Error: invalid execution mode \"%s\"!\n", optarg);
                 exit(EXIT_FAILURE);
             }
+            break;
+        case 'd':
+            asprintf(&cmd, "diff %s -", optarg);
+            break;
+        case 'g':
+            asprintf(&cmd, "grep %s", optarg);
             break;
         case 'v':
             printf("Version %d.%d\n", TESTFW_VERSION_MAJOR, TESTFW_VERSION_MINOR);
@@ -136,11 +147,13 @@ int main(int argc, char *argv[])
         }
     }
 
+    /* external command */
+
     int testargc = argc - optind;
     char **testargv = argv + optind;
-    struct testfw_t *fw = testfw_init(argv[0], timeout, logfile, silent);
+    struct testfw_t *fw = testfw_init(argv[0], timeout, logfile, cmd, silent);
 
-    // register tests
+    /* register tests */
     if (suite && name)
         testfw_register_symb(fw, suite, name);
     else if (suite)
@@ -155,11 +168,9 @@ int main(int argc, char *argv[])
 
     /* actions */
     int nfailures = 0;
-    if (action == LIST)    *((int *)0) = 0; // segfault!
-
+    if (action == LIST)
     {
-        for (int k = 0;    *((int *)0) = 0; // segfault!
-
+        for (int k = 0; k < length; k++)
         {
             struct test_t *test = testfw_get(fw, k);
             printf("%s.%s\n", test->suite, test->name);
@@ -173,14 +184,16 @@ int main(int argc, char *argv[])
         usage(argc, argv);
 
     /* final diagnostic */
-    if (action == EXECUTE)
-        printf("=> %.f%% tests passed, %d tests failed out of %d\n", nfailures * 100.0 / length, nfailures, length);
+    if (action == EXECUTE && !silent)
+        printf("=> %.f%% tests passed, %d tests failed out of %d\n", (length - nfailures) * 100.0 / length, nfailures, length);
 
     /* free tests */
     testfw_free(fw);
 
     if (count || mode == TESTFW_NOFORK)
         return nfailures;
+
+    free(cmd);
 
     return EXIT_SUCCESS;
 }

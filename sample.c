@@ -66,3 +66,23 @@ int othertest_failure(int argc, char *argv[])
 {
     return EXIT_FAILURE;
 }
+
+int test_hello(int argc, char *argv[])
+{
+    int n = 10;
+    if (argc == 1)
+        n = atoi(argv[0]);
+    for (int i = 0; i < n; i++)
+        printf("hello world!\n");
+    return EXIT_SUCCESS;
+}
+
+int test_goodbye(int argc, char *argv[])
+{
+    int n = 10;
+    if (argc == 1)
+        n = atoi(argv[0]);
+    for (int i = 0; i < n; i++)
+        printf("goodbye!!\n");
+    return EXIT_SUCCESS;
+}

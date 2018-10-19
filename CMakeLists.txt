@@ -3,17 +3,8 @@ cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-# set default build type
-if(NOT CMAKE_BUILD_TYPE)
-     message(STATUS "No build type selected, set default to RELEASE")
-     set(CMAKE_BUILD_TYPE "RELEASE" CACHE STRING "Build Type" FORCE)
-endif()
-
 include(CTest)
 enable_testing()
-
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -std=c99")
-# set(CMAKE_LD_FLAGS "${CMAKE_LD_FLAGS} -rdynamic")
 
 set(CMAKE_C_FLAGS "-Wall -fPIC -std=c99")
 set(CMAKE_LD_FLAGS "-rdynamic")
@@ -36,12 +27,18 @@ target_link_libraries(sample_main testfw)
 # launch test directly using CTest
 set(tests "test.success" "test.failure" "test.segfault" "test.assert" "test.sleep" "test.alarm" "test.args" "test.infiniteloop")
 foreach(test ${tests})
-add_test(${test} sample  -m nofork -r ${test} -x)
-set_tests_properties (${test} PROPERTIES TIMEOUT 2)
+# add_test(${test} sample -m nofork -r ${test} -x)
+add_test(${test} sample -t 2 -r ${test} -x)
+set_tests_properties (${test} PROPERTIES TIMEOUT 4)
 endforeach()
 
 # launch tests within TESTFW
-add_test(sample_all sample -x)
+add_test(sample_all sample -t 2 -x)
 add_test(sample_main sample_main)
 
+# launch test hello
+file(COPY hello.expected DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_test(hello hello -x)
+add_test(hello_grep hello -x -g hello)
+add_test(hello_diff hello -x -d hello.expected WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 

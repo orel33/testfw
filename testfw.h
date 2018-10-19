@@ -9,17 +9,30 @@
 
 #define TESTFW_VERSION_MAJOR 0
 #define TESTFW_VERSION_MINOR 1
-# define TESTFW_EXIT_SUCCESS EXIT_SUCCESS
-# define TESTFW_EXIT_FAILURE EXIT_FAILURE
-# define TESTFW_EXIT_TIMEOUT 124
+#define TESTFW_EXIT_SUCCESS EXIT_SUCCESS
+#define TESTFW_EXIT_FAILURE EXIT_FAILURE
+#define TESTFW_EXIT_TIMEOUT 124
 
+/**
+ * @brief 
+ * 
+ */
 enum testfw_mode_t
 {
-    TESTFW_FORK,
-    TESTFW_THREAD,
-    TESTFW_NOFORK
+    TESTFW_FORKS, /**> sequential test execution with process fork */
+    TESTFW_FORKP, /**> parallel test execution with process fork */
+    TESTFW_NOFORK /**>  sequential test execution without process fork */
 };
+
+/**
+ * @brief 
+ * 
+ */
 typedef int (*testfw_func_t)(int argc, char *argv[]);
+/**
+ * @brief 
+ * 
+ */
 struct test_t
 {
     char *suite;
@@ -35,10 +48,11 @@ struct testfw_t; /* forward decalaration */
  * @param program 
  * @param timeout 
  * @param logfile 
+ * @param cmd
  * @param silent 
  * @return struct testfw_t* 
  */
-struct testfw_t *testfw_init(char *program, int timeout, char *logfile, bool silent);
+struct testfw_t *testfw_init(char *program, int timeout, char *logfile, char *cmd, bool silent);
 
 /**
  * @brief finalize test framework
@@ -98,11 +112,13 @@ int testfw_register_suite(struct testfw_t *fw, char *suite);
  * @brief run all registered tests
  * 
  * @param fw 
- * @param testargc 
- * @param testargv 
+ * @param argc 
+ * @param argv 
+ * @param cmd 
  * @param testfw_mode_t 
  * @return int 
  */
-int testfw_run_all(struct testfw_t *fw, int testargc, char *testargv[], enum testfw_mode_t mode);
+
+int testfw_run_all(struct testfw_t *fw, int argc, char *argv[], enum testfw_mode_t mode);
 
 #endif
