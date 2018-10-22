@@ -141,16 +141,16 @@ Run your tests with some options (timeout = 2 seconds, log file = /dev/null).  B
 
 ```bash
 $ ./sample -t 2 -O -x
-[KILLED] run test "test.alarm" in 1000.56 ms (signal "Alarm clock", wstatus 14)
-[SUCCESS] run test "test.args" in 0.53 ms (status 0, wstatus 0)
-[KILLED] run test "test.assert" in 0.49 ms (signal "Aborted", wstatus 6)
-[FAILURE] run test "test.failure" in 0.40 ms (status 1, wstatus 256)
-[SUCCESS] run test "test.goodbye" in 0.52 ms (status 0, wstatus 0)
-[SUCCESS] run test "test.hello" in 0.47 ms (status 0, wstatus 0)
-[TIMEOUT] run test "test.infiniteloop" in 2000.19 ms (status 124, wstatus 31744)
-[KILLED] run test "test.segfault" in 0.14 ms (signal "Segmentation fault", wstatus 11)
-[TIMEOUT] run test "test.sleep" in 2000.33 ms (status 124, wstatus 31744)
-[SUCCESS] run test "test.success" in 0.42 ms (status 0, wstatus 0)
+[KILLED] run test "test.alarm" in 1000.56 ms (signal "Alarm clock")
+[SUCCESS] run test "test.args" in 0.53 ms (status 0)
+[KILLED] run test "test.assert" in 0.49 ms (signal "Aborted")
+[FAILURE] run test "test.failure" in 0.40 ms (status 1)
+[SUCCESS] run test "test.goodbye" in 0.52 ms (status 0)
+[SUCCESS] run test "test.hello" in 0.47 ms (status 0)
+[TIMEOUT] run test "test.infiniteloop" in 2000.19 ms (status 124)
+[KILLED] run test "test.segfault" in 0.14 ms (signal "Segmentation fault")
+[TIMEOUT] run test "test.sleep" in 2000.33 ms (status 124)
+[SUCCESS] run test "test.success" in 0.42 ms (status 0)
 => 40% tests passed, 6 tests failed out of 10
 ```
 
@@ -158,16 +158,16 @@ If you prefer to run all tests in parallel (i.e. in concurrent processes), you c
 
 ```bash
 $ ./sample -O -t 2 -m forkp
-[SUCCESS] run test "test.args" in 0.17 ms (status 0, wstatus 0)
-[FAILURE] run test "test.failure" in 0.27 ms (status 1, wstatus 256)
-[SUCCESS] run test "test.goodbye" in 0.30 ms (status 0, wstatus 0)
-[SUCCESS] run test "test.success" in 0.18 ms (status 0, wstatus 0)
-[KILLED] run test "test.assert" in 0.31 ms (signal "Aborted", wstatus 6)
-[SUCCESS] run test "test.hello" in 0.31 ms (status 0, wstatus 0)
-[KILLED] run test "test.segfault" in 0.46 ms (signal "Segmentation fault", wstatus 11)
-[KILLED] run test "test.alarm" in 1000.29 ms (signal "Alarm clock", wstatus 14)
-[TIMEOUT] run test "test.infiniteloop" in 2000.23 ms (status 124, wstatus 31744)
-[TIMEOUT] run test "test.sleep" in 2000.15 ms (status 124, wstatus 31744)
+[SUCCESS] run test "test.args" in 0.17 ms (status 0)
+[FAILURE] run test "test.failure" in 0.27 ms (status 1)
+[SUCCESS] run test "test.goodbye" in 0.30 ms (status 0)
+[SUCCESS] run test "test.success" in 0.18 ms (status 0)
+[KILLED] run test "test.assert" in 0.31 ms (signal "Aborted")
+[SUCCESS] run test "test.hello" in 0.31 ms (status 0)
+[KILLED] run test "test.segfault" in 0.46 ms (signal "Segmentation fault")
+[KILLED] run test "test.alarm" in 1000.29 ms (signal "Alarm clock")
+[TIMEOUT] run test "test.infiniteloop" in 2000.23 ms (status 124)
+[TIMEOUT] run test "test.sleep" in 2000.15 ms (status 124)
 => 40% tests passed, 6 tests failed out of 10
 ```
 
@@ -177,7 +177,7 @@ Let's run a *single test* instead of a *test suite* as follow:
 
 ```bash
 $ ./sample -m fork -r test.failure -x
-[FAILURE] run test "test.failure" in 0.43 ms (status 1, wstatus 256)
+[FAILURE] run test "test.failure" in 0.43 ms (status 1)
 => 100% tests passed, 0 tests failed out of 1
 $ echo $?
 0
@@ -189,7 +189,7 @@ Now, let's run a single test in *nofork* mode:
 
 ```bash
 $ ./sample -m nofork  -r test.failure -x
-[FAILURE] run test "test.failure" in 0.01 ms (status 1, wstatus 256)
+[FAILURE] run test "test.failure" in 0.01 ms (status 1)
 $ echo $?
 1
 ```
@@ -222,7 +222,7 @@ Let's consider the [hello.c](hello.c) sample, that just prints "hello world".
 ```bash
 $ ./hello
 hello world
-[SUCCESS] run test "test.hello" in 0.53 ms (status 0, wstatus 0)
+[SUCCESS] run test "test.hello" in 0.53 ms (status 0)
 => 100% tests passed, 0 tests failed out of 1
 ```
 
@@ -231,11 +231,11 @@ Let's search for some patterns in the test output (using *grep* command).
 ```bash
 $ ./hello -g "world"
 hello world
-[SUCCESS] run test "test.hello" in 0.53 ms (status 0, wstatus 0)
+[SUCCESS] run test "test.hello" in 0.53 ms (status 0)
 => 100% tests passed, 0 tests failed out of 1
 
 $  ./hello -g "helo"
-[FAILURE] run test "test.hello" in 0.57 ms (status 1, wstatus 256)
+[FAILURE] run test "test.hello" in 0.57 ms (status 1)
 => 0% tests passed, 1 tests failed out of 1
 ```
 
@@ -244,7 +244,7 @@ If you want to compare line by line your test output with an expected output, yo
 ```bash
 $ echo "hello world" > hello.expected
 $ ./hello -d hello.expected
-[SUCCESS] run test "test.hello" in 0.57 ms (status 0, wstatus 0)
+[SUCCESS] run test "test.hello" in 0.57 ms (status 0)
 => 100% tests passed, 0 tests failed out of 1
 
 $ ./hello -d goodbye.expected
@@ -252,7 +252,7 @@ $ ./hello -d goodbye.expected
 < goodbye
 ---
 > hello world
-[FAILURE] run test "test.hello" in 0.17 ms (status 1, wstatus 256)
+[FAILURE] run test "test.hello" in 0.17 ms (status 1)
 => 0% tests passed, 1 tests failed out of 1
 ```
 
@@ -287,10 +287,10 @@ Compiling and running this test will produce the following results.
 ```bash
 $ gcc -std=c99 -rdynamic -Wall sample.c sample_main.c -o sample_main -ltestfw -ldl -L.
 $ ./sample_main
-[SUCCESS] run test "test.success" in 0.24 ms (status 0, wstatus 0)
-[FAILURE] run test "test.failure" in 0.29 ms (status 1, wstatus 256)
-[FAILURE] run test "othertest.failure" in 0.09 ms (status 1, wstatus 256)
-[SUCCESS] run test "othertest.success" in 0.17 ms (status 0, wstatus 0)
+[SUCCESS] run test "test.success" in 0.24 ms (status 0)
+[FAILURE] run test "test.failure" in 0.29 ms (status 1)
+[FAILURE] run test "othertest.failure" in 0.09 ms (status 1)
+[SUCCESS] run test "othertest.success" in 0.17 ms (status 0)
 ```
 
 ---
