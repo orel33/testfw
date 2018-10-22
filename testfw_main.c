@@ -103,12 +103,15 @@ int main(int argc, char *argv[])
             count = true;
             break;
         case 'o':
+            assert(cmd == NULL && logfile == NULL);
             logfile = optarg;
             break;
         case 'O':
+            assert(cmd == NULL && logfile == NULL);
             logfile = "/dev/null";
             break;
         case 'S':
+            assert(cmd == NULL && logfile == NULL);
             silent = true;
             logfile = "/dev/null";
             break;
@@ -132,9 +135,11 @@ int main(int argc, char *argv[])
             }
             break;
         case 'd':
+            assert(cmd == NULL && logfile == NULL);
             asprintf(&cmd, "diff %s -", optarg);
             break;
         case 'g':
+            assert(cmd == NULL && logfile == NULL);
             asprintf(&cmd, "grep %s", optarg);
             break;
         case 'v':
