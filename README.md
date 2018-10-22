@@ -10,7 +10,7 @@ The main features are:
 * easy way to integrate your tests, just by adding some *test_\*()* functions
 * support test with *argv* arguments
 * all tests are executed sequentially (one by one)
-* different execution modes: "fork", "thread" or "nofork"
+* different execution modes: sequential fork, parallel fork or no fork
 
 ## Compilation
 
