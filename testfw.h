@@ -76,7 +76,7 @@ int testfw_length(struct testfw_t *fw);
  *
  * @param fw the test framework
  * @param k index of the test to get (k >=0)
- * @return a pointer on the k-th registred test
+ * @return a pointer on the k-th registered test
  */
 struct test_t *testfw_get(struct testfw_t *fw, int k);
 
@@ -106,7 +106,7 @@ struct test_t *testfw_register_symb(struct testfw_t *fw, char *suite, char *name
  *
  * @param fw the test framework
  * @param suite a suite name in which to register these tests
- * @return a pointer to the structure, that registers this test
+ * @return the number of new registered tests
  */
 int testfw_register_suite(struct testfw_t *fw, char *suite);
 
@@ -117,7 +117,7 @@ int testfw_register_suite(struct testfw_t *fw, char *suite);
  * @param argc the number of arguments passed to each test function
  * @param argv the array of arguments passed to each test function
  * @param mode the execution mode in which to run each test function
- * @return the number of new registred tests
+ * @return the number of tests that fail
  */
 int testfw_run_all(struct testfw_t *fw, int argc, char *argv[], enum testfw_mode_t mode);
 
