@@ -27,7 +27,6 @@ target_link_libraries(sample_main testfw)
 # launch test directly using CTest
 set(tests "test.success" "test.failure" "test.segfault" "test.assert" "test.sleep" "test.alarm" "test.args" "test.infiniteloop")
 foreach(test ${tests})
-# add_test(${test} sample -m nofork -r ${test} -x)
 add_test(${test} sample -t 2 -r ${test} -x)
 set_tests_properties (${test} PROPERTIES TIMEOUT 4)
 endforeach()

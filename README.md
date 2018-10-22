@@ -215,7 +215,7 @@ argc: 3, argv: a b c
 
 ## Apply an external command to test output
 
-The TestFW API allows the execution of an external command (e.g. diff, grep) using the classic Unix *pipe* mechanism. The *testfw_main* library provides to useful options (-g and -d) based on this mechanism. In this case, the return status will be the status of the test it self if it fails, else the status of the external command applied. 
+The TestFW API allows the execution of an external command (e.g. diff, grep) using the classic Unix *pipe* mechanism. The *testfw_main* library provides to useful options (-g and -d) based on this mechanism. In this case, the return status will be the status of the test it self if it fails, else the status of the external command applied.
 
 Let's consider the [hello.c](hello.c) sample, that just prints "hello world".
 
