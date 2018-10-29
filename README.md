@@ -176,11 +176,11 @@ $ ./sample -O -t 2 -m forkp
 Let's run a *single test* instead of a *test suite* as follow:
 
 ```bash
-$ ./sample -m fork -r test.failure -x
+$ ./sample -m forks -r test.failure -x
 [FAILURE] run test "test.failure" in 0.43 ms (status 1)
 => 0% tests passed, 1 tests failed out of 1
 $ echo $?
-1
+0
 ```
 
 As already explained, the *forks* mode starts each test separately in a forked process. The failure of a test will not affect the execution of the following tests.
