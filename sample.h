@@ -1,6 +1,10 @@
 #ifndef test_H
 #define test_H
 
+#ifdef NDEBUG
+#error "Error: don't compile sample.c with NDBUG macro!"
+#endif
+
 /**
  * @brief return success
  */
