@@ -162,8 +162,14 @@ static char **discover_all_tests(struct testfw_t *fw, char *suite)
 
     char *prefix_ = malloc(strlen(suite) + 2); /* adding a trailing '_' to suite */
     assert(prefix_);
+#if defined(__APPLE__) && defined(__MACH__)
+    strcpy(prefix_, "_");
+    strcat(prefix_, suite);
+    strcat(prefix_, "_");
+#else
     strcpy(prefix_, suite);
     strcat(prefix_, "_");
+#endif
 
     /* TODO: inspect symbol table instead of using nm external command */
     asprintf(&cmdline, "nm --defined-only %s | cut -d ' ' -f 3 | grep ^%s ", fw->program, prefix_);
